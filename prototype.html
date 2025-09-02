@@ -1,0 +1,1529 @@
+import React, { useState, useEffect } from 'react';
+import { Search, MapPin, DollarSign, Clock, Star, ChevronDown, Filter, Heart, MessageCircle, User, GraduationCap, Briefcase, Phone, Mail, CheckCircle, AlertCircle, TrendingUp, Calendar, Users, BookOpen, Award } from 'lucide-react';
+
+// Mock data
+const mockPrograms = [
+  {
+    id: 1,
+    name: 'Medical Assistant Certificate',
+    school: 'Minneapolis Community College',
+    duration: '36 weeks',
+    cost: 8500,
+    originalCost: 12500,
+    location: '3.2 miles',
+    rating: 4.8,
+    jobPlacement: 94,
+    schedule: ['Evening'],
+    accredited: true,
+    featured: true,
+    nextStart: 'March 15, 2025',
+    description: 'Comprehensive medical assistant training with hands-on clinical experience.',
+    benefits: ['Evening classes', 'Job placement assistance', 'Financial aid eligible']
+  },
+  {
+    id: 2,
+    name: 'Medical Assistant Diploma',
+    school: 'Hennepin Technical College',
+    duration: '40 weeks',
+    cost: 9200,
+    originalCost: 13800,
+    location: '8.7 miles',
+    rating: 4.6,
+    jobPlacement: 89,
+    schedule: ['Day', 'Evening'],
+    accredited: true,
+    featured: false,
+    nextStart: 'April 1, 2025',
+    description: 'Extended diploma program with advanced administrative skills.',
+    benefits: ['Flexible scheduling', 'Internship included', 'Career counseling']
+  },
+  {
+    id: 3,
+    name: 'Medical Assistant Certificate',
+    school: 'Rasmussen University',
+    duration: '32 weeks',
+    cost: 12800,
+    originalCost: 15200,
+    location: '12.1 miles',
+    rating: 4.3,
+    jobPlacement: 91,
+    schedule: ['Online', 'Hybrid'],
+    accredited: true,
+    featured: false,
+    nextStart: 'Rolling start',
+    description: 'Accelerated program with online flexibility.',
+    benefits: ['Online options', 'Accelerated pace', 'Industry partnerships']
+  }
+];
+
+const mockEmployers = [
+  'Mayo Clinic', 'Allina Health', 'HealthPartners', 'M Health Fairview', 'Park Nicollet'
+];
+
+const specialties = [
+  'Medical Assistant', 'Phlebotomy', 'Radiology Tech', 'Respiratory Therapy', 
+  'Physical Therapy Assistant', 'Pharmacy Technician', 'Dental Assistant'
+];
+
+const Allied_Health_Platform = () => {
+  const [currentView, setCurrentView] = useState('home');
+  const [selectedPrograms, setSelectedPrograms] = useState([]);
+  const [userProfile, setUserProfile] = useState({
+    name: 'Sarah Johnson',
+    location: 'Minneapolis, MN',
+    interestedPrograms: ['Medical Assistant', 'Phlebotomy'],
+    budget: '5000-15000',
+    schedule: 'Evening',
+    financialAid: true,
+    employerBenefits: false
+  });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState({
+    specialty: '',
+    maxCost: 15000,
+    schedule: '',
+    distance: 25
+  });
+  const [showFilters, setShowFilters] = useState(false);
+
+  const filteredPrograms = mockPrograms.filter(program => {
+    return (
+      (!searchQuery || program.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+       program.school.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      (!filters.specialty || program.name.toLowerCase().includes(filters.specialty.toLowerCase())) &&
+      (program.cost <= filters.maxCost) &&
+      (!filters.schedule || program.schedule.some(s => s.toLowerCase().includes(filters.schedule.toLowerCase())))
+    );
+  });
+
+  // Home/Landing View
+  const HomeView = () => (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-blue-600 text-white p-4">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <h1 className="text-xl font-bold">Allied Health Student Platform</h1>
+          <button className="p-2 hover:bg-blue-700 rounded">
+            <User className="h-5 w-5" />
+          </button>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold mb-4">Find Your Healthcare Career Path</h2>
+          <p className="text-xl mb-8 text-blue-100">
+            Compare accredited allied health programs • Connect with employers • Get financial aid info
+          </p>
+          
+          {/* Search Bar */}
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="flex bg-white rounded-lg overflow-hidden shadow-lg">
+              <input
+                type="text"
+                placeholder="Search programs or specialties..."
+                className="flex-1 p-4 text-gray-900"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button 
+                onClick={() => setCurrentView('search')}
+                className="bg-blue-600 hover:bg-blue-700 px-8 py-4 flex items-center gap-2"
+              >
+                <Search className="h-5 w-5" />
+                Search
+              </button>
+            </div>
+          </div>
+
+          {/* User Type Selection */}
+          <div className="max-w-3xl mx-auto">
+            <p className="text-lg mb-4">I am a...</p>
+            <div className="grid md:grid-cols-3 gap-4">
+              <button 
+                onClick={() => setCurrentView('search')}
+                className="bg-blue-500 hover:bg-blue-400 p-6 rounded-lg text-center transition-colors"
+              >
+                <GraduationCap className="h-8 w-8 mx-auto mb-2" />
+                <div className="font-semibold">Student Looking for Programs</div>
+              </button>
+              <button 
+                onClick={() => setCurrentView('school-dashboard')}
+                className="bg-white text-green-600 border-2 border-green-500 hover:bg-green-50 p-6 rounded-lg text-center transition-colors"
+              >
+                <BookOpen className="h-8 w-8 mx-auto mb-2" />
+                <div className="font-semibold">School Partner</div>
+              </button>
+              <button 
+                onClick={() => setCurrentView('employer-dashboard')}
+                className="bg-white text-gray-600 border-2 border-gray-500 hover:bg-gray-50 p-6 rounded-lg text-center transition-colors"
+              >
+                <Briefcase className="h-8 w-8 mx-auto mb-2" />
+                <div className="font-semibold">Employer Partner</div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Popular Programs */}
+      <div className="py-12 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-2xl font-bold text-center mb-8">Popular Programs</h3>
+          <div className="grid md:grid-cols-4 gap-4">
+            {specialties.slice(0, 4).map((specialty) => (
+              <button
+                key={specialty}
+                onClick={() => {
+                  setFilters({...filters, specialty});
+                  setCurrentView('search');
+                }}
+                className="p-4 bg-white border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors"
+              >
+                {specialty}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Value Props */}
+      <div className="bg-blue-50 py-12 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="text-center">
+              <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+              <h4 className="font-semibold mb-2">Only Accredited Programs</h4>
+              <p className="text-gray-600 text-sm">Verified quality education from accredited institutions</p>
+            </div>
+            <div className="text-center">
+              <DollarSign className="h-12 w-12 text-green-500 mx-auto mb-4" />
+              <h4 className="font-semibold mb-2">Real Cost After Financial Aid</h4>
+              <p className="text-gray-600 text-sm">See your actual costs after grants and assistance</p>
+            </div>
+            <div className="text-center">
+              <MessageCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+              <h4 className="font-semibold mb-2">Direct School Connection</h4>
+              <p className="text-gray-600 text-sm">No spam - connect directly with schools you choose</p>
+            </div>
+            <div className="text-center">
+              <TrendingUp className="h-12 w-12 text-green-500 mx-auto mb-4" />
+              <h4 className="font-semibold mb-2">Job Placement Support</h4>
+              <p className="text-gray-600 text-sm">Career services and employer connections</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Program Search View
+  const SearchView = () => (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b p-4">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <button 
+            onClick={() => setCurrentView('home')}
+            className="text-blue-600 hover:text-blue-800"
+          >
+            ← Back to Home
+          </button>
+          <h1 className="text-lg font-semibold">Program Search</h1>
+          <button onClick={() => setCurrentView('profile')} className="p-2 hover:bg-gray-100 rounded">
+            <User className="h-5 w-5" />
+          </button>
+        </div>
+      </header>
+
+      {/* Search and Filter Bar */}
+      <div className="bg-white border-b p-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex gap-4 mb-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search programs..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              <Filter className="h-4 w-4" />
+              Filters
+            </button>
+          </div>
+
+          {/* Filter Tags */}
+          <div className="flex gap-2 flex-wrap">
+            {filters.specialty && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                {filters.specialty}
+                <button onClick={() => setFilters({...filters, specialty: ''})} className="text-blue-600 hover:text-blue-800">×</button>
+              </span>
+            )}
+            {filters.schedule && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
+                {filters.schedule}
+                <button onClick={() => setFilters({...filters, schedule: ''})} className="text-yellow-600 hover:text-yellow-800">×</button>
+              </span>
+            )}
+            <span className="text-sm text-gray-600">{filteredPrograms.length} results</span>
+          </div>
+
+          {/* Filter Panel */}
+          {showFilters && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              <div className="grid md:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Specialty</label>
+                  <select 
+                    className="w-full p-2 border border-gray-300 rounded"
+                    value={filters.specialty}
+                    onChange={(e) => setFilters({...filters, specialty: e.target.value})}
+                  >
+                    <option value="">All Specialties</option>
+                    {specialties.map(specialty => (
+                      <option key={specialty} value={specialty}>{specialty}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Max Cost</label>
+                  <select 
+                    className="w-full p-2 border border-gray-300 rounded"
+                    value={filters.maxCost}
+                    onChange={(e) => setFilters({...filters, maxCost: parseInt(e.target.value)})}
+                  >
+                    <option value="10000">Under $10,000</option>
+                    <option value="15000">Under $15,000</option>
+                    <option value="20000">Under $20,000</option>
+                    <option value="50000">Any Budget</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Schedule</label>
+                  <select 
+                    className="w-full p-2 border border-gray-300 rounded"
+                    value={filters.schedule}
+                    onChange={(e) => setFilters({...filters, schedule: e.target.value})}
+                  >
+                    <option value="">Any Schedule</option>
+                    <option value="Evening">Evening</option>
+                    <option value="Day">Day</option>
+                    <option value="Online">Online</option>
+                    <option value="Weekend">Weekend</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Distance</label>
+                  <select 
+                    className="w-full p-2 border border-gray-300 rounded"
+                    value={filters.distance}
+                    onChange={(e) => setFilters({...filters, distance: parseInt(e.target.value)})}
+                  >
+                    <option value="10">Within 10 miles</option>
+                    <option value="25">Within 25 miles</option>
+                    <option value="50">Within 50 miles</option>
+                    <option value="100">Any Distance</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Results */}
+      <div className="max-w-6xl mx-auto p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Medical Assistant Programs</h2>
+          <select className="p-2 border border-gray-300 rounded">
+            <option>Sort by: Best Match</option>
+            <option>Sort by: Cost (Low to High)</option>
+            <option>Sort by: Distance</option>
+            <option>Sort by: Rating</option>
+          </select>
+        </div>
+
+        <div className="space-y-4">
+          {filteredPrograms.map((program) => (
+            <div key={program.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-lg font-semibold">{program.school}</h3>
+                    {program.featured && (
+                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
+                        FEATURED
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-gray-600 mb-2">{program.name} • {program.duration}</p>
+                  <p className="text-gray-500 text-sm mb-2">{program.description}</p>
+                  
+                  {/* Key Info Row */}
+                  <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4" />
+                      {program.location}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Star className="h-4 w-4 text-yellow-500" />
+                      {program.rating}/5
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <TrendingUp className="h-4 w-4 text-green-500" />
+                      {program.jobPlacement}% job placement
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      Starts {program.nextStart}
+                    </span>
+                  </div>
+
+                  {/* Tags */}
+                  <div className="flex gap-2 mt-3">
+                    {program.schedule.map((schedule) => (
+                      <span key={schedule} className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
+                        {schedule}
+                      </span>
+                    ))}
+                    {program.accredited && (
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                        Accredited
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="text-right ml-6">
+                  <div className="text-2xl font-bold text-green-600">
+                    ${program.cost.toLocaleString()} <span className="text-sm font-normal text-gray-500">after aid</span>
+                  </div>
+                  {program.originalCost > program.cost && (
+                    <div className="text-sm text-gray-500 line-through">
+                      ${program.originalCost.toLocaleString()}
+                    </div>
+                  )}
+                  <div className="text-xs text-green-600 mt-1">
+                    ${(program.originalCost - program.cost).toLocaleString()} savings
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setCurrentView('career-path')}
+                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  View Career Path
+                </button>
+                <button 
+                  onClick={() => setCurrentView('contact-school')}
+                  className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  Contact School
+                </button>
+                <button 
+                  onClick={() => {
+                    if (selectedPrograms.includes(program.id)) {
+                      setSelectedPrograms(selectedPrograms.filter(id => id !== program.id));
+                    } else {
+                      setSelectedPrograms([...selectedPrograms, program.id]);
+                    }
+                  }}
+                  className={`p-2 rounded-lg border-2 transition-colors ${
+                    selectedPrograms.includes(program.id) 
+                      ? 'bg-red-50 border-red-300 text-red-600' 
+                      : 'bg-white border-gray-300 text-gray-600 hover:border-red-300'
+                  }`}
+                >
+                  <Heart className={`h-5 w-5 ${selectedPrograms.includes(program.id) ? 'fill-current' : ''}`} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Compare Button */}
+        {selectedPrograms.length > 0 && (
+          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2">
+            <button 
+              onClick={() => setCurrentView('compare')}
+              className="bg-green-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+            >
+              Compare Selected ({selectedPrograms.length})
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // Career Path View
+  const CareerPathView = () => {
+    const program = mockPrograms[0]; // Using first program as example
+    
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-green-600 text-white p-4">
+          <div className="max-w-4xl mx-auto flex justify-between items-center">
+            <button 
+              onClick={() => setCurrentView('search')}
+              className="text-green-100 hover:text-white"
+            >
+              ← Back to Search
+            </button>
+            <h1 className="text-lg font-semibold">Your Career Path</h1>
+            <div></div>
+          </div>
+        </header>
+
+        <div className="max-w-4xl mx-auto p-4">
+          {/* Path Overview */}
+          <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-lg mb-6">
+            <h2 className="text-2xl font-bold mb-2">Medical Assistant Career Path</h2>
+            <p className="text-green-100 mb-2">From training to career in 12 months</p>
+            <p className="text-xl font-semibold">Average Starting Salary: $52,000/year</p>
+          </div>
+
+          {/* Timeline Steps */}
+          <div className="space-y-6">
+            {/* Step 1: Education */}
+            <div className="bg-white border-l-4 border-blue-500 p-6 rounded-lg shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                  1
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-blue-600 mb-2">Complete Training Program</h3>
+                  <div className="mb-3">
+                    <p className="font-medium">{program.school}</p>
+                    <div className="flex gap-4 text-sm text-gray-600 mt-1">
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        {program.duration}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <DollarSign className="h-4 w-4" />
+                        ${program.cost.toLocaleString()} after financial aid
+                      </span>
+                    </div>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded text-sm text-blue-800">
+                    <CheckCircle className="h-4 w-4 inline mr-1" />
+                    {program.jobPlacement}% pass rate on certification exam
+                  </div>
+                </div>
+                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                  Apply Now
+                </button>
+              </div>
+            </div>
+
+            {/* Step 2: Certification */}
+            <div className="bg-white border-l-4 border-yellow-500 p-6 rounded-lg shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                  2
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-yellow-600 mb-2">Get Certified</h3>
+                  <p className="text-gray-600 mb-2">Pass national certification exam (CMA or RMA)</p>
+                  <div className="flex gap-4 text-sm text-gray-600">
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      1-2 months after graduation
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3: Employment */}
+            <div className="bg-white border-l-4 border-green-500 p-6 rounded-lg shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                  3
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-green-600 mb-2">Start Your Career</h3>
+                  <p className="text-gray-600 mb-3">Job placement with our employer partners:</p>
+                  
+                  {/* Employer Partners */}
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
+                    {mockEmployers.map((employer) => (
+                      <div key={employer} className="bg-gray-100 p-2 rounded text-center text-sm">
+                        {employer}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="bg-green-50 p-3 rounded">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-green-800 font-medium">Starting Salary Range:</span>
+                      <span className="text-green-600 font-bold">$48,000 - $56,000</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm mt-1">
+                      <span className="text-green-800">Job Placement Rate:</span>
+                      <span className="text-green-600 font-medium">92% within 6 months</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Investment Summary */}
+          <div className="bg-green-50 border border-green-200 p-6 rounded-lg mt-6">
+            <h3 className="text-lg font-semibold text-green-800 mb-4">Investment Summary</h3>
+            <div className="grid md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <span className="text-gray-600">Total Cost:</span>
+                <div className="text-xl font-bold text-green-600">
+                  ${program.cost.toLocaleString()}
+                </div>
+                <span className="text-xs text-gray-500">(after financial aid)</span>
+              </div>
+              <div>
+                <span className="text-gray-600">Time to Complete:</span>
+                <div className="text-xl font-bold text-green-600">{program.duration}</div>
+              </div>
+              <div>
+                <span className="text-gray-600">ROI:</span>
+                <div className="text-xl font-bold text-green-600">~2 months</div>
+                <span className="text-xs text-gray-500">to recover investment</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-4 mt-6">
+            <button 
+              onClick={() => setCurrentView('contact-school')}
+              className="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors font-medium"
+            >
+              Start This Path
+            </button>
+            <button 
+              className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              Save Path
+            </button>
+            <button 
+              onClick={() => setCurrentView('compare')}
+              className="bg-white border border-gray-300 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              Compare Paths
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Contact School View
+  const ContactSchoolView = () => {
+    const [step, setStep] = useState(1);
+    const [formData, setFormData] = useState({
+      interests: '',
+      startTime: 'Next 3 months',
+      contactMethod: 'Email'
+    });
+
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-blue-600 text-white p-4">
+          <div className="max-w-4xl mx-auto flex justify-between items-center">
+            <button 
+              onClick={() => setCurrentView('search')}
+              className="text-blue-100 hover:text-white"
+            >
+              ← Back to Search
+            </button>
+            <h1 className="text-lg font-semibold">Connect with School</h1>
+            <div></div>
+          </div>
+        </header>
+
+        <div className="max-w-2xl mx-auto p-4">
+          {/* School Header */}
+          <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
+                <BookOpen className="h-8 w-8 text-blue-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold">Minneapolis Community College</h2>
+                <p className="text-gray-600">Medical Assistant Certificate Program</p>
+                <p className="text-green-600 font-semibold">$8,500 estimated cost after aid</p>
+              </div>
+            </div>
+
+            {/* Progress Indicator */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  step >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-400'
+                }`}>
+                  1
+                </div>
+                <div className={`w-16 h-1 ${step >= 2 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  step >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-400'
+                }`}>
+                  2
+                </div>
+                <div className={`w-16 h-1 ${step >= 3 ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  step >= 3 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-400'
+                }`}>
+                  3
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-between text-sm text-gray-600">
+              <span className={step === 1 ? 'text-blue-600 font-medium' : ''}>Your Info</span>
+              <span className={step === 2 ? 'text-blue-600 font-medium' : ''}>Interests</span>
+              <span className={step === 3 ? 'text-blue-600 font-medium' : ''}>Submit</span>
+            </div>
+          </div>
+
+          {/* Form Content */}
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            {step === 1 && (
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Your Information</h3>
+                <p className="text-gray-600 mb-6">We'll use your profile information to contact you</p>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input 
+                      type="text" 
+                      value={userProfile.name}
+                      className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
+                      readOnly
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                    <input 
+                      type="text" 
+                      value={userProfile.location}
+                      className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
+                      readOnly
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input 
+                      type="email" 
+                      value="sarah.johnson@email.com"
+                      className="w-full p-3 border border-gray-300 rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input 
+                      type="tel" 
+                      value="(612) 555-0123"
+                      className="w-full p-3 border border-gray-300 rounded-lg"
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => setStep(2)}
+                  className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium mt-6"
+                >
+                  Continue
+                </button>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Tell us about your interests</h3>
+                <p className="text-gray-600 mb-6">Help the school provide the best information for you</p>
+
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      What interests you most about this program?
+                    </label>
+                    <textarea
+                      className="w-full p-3 border border-gray-300 rounded-lg h-24"
+                      placeholder="I'm interested in the medical field and want a stable career..."
+                      value={formData.interests}
+                      onChange={(e) => setFormData({...formData, interests: e.target.value})}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      When would you like to start?
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {['Next 3 months', '6 months', 'Not sure'].map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => setFormData({...formData, startTime: option})}
+                          className={`p-2 rounded-lg border text-sm ${
+                            formData.startTime === option
+                              ? 'bg-blue-600 text-white border-blue-600'
+                              : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300'
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Preferred contact method
+                    </label>
+                    <div className="flex gap-4">
+                      {['Email', 'Phone', 'Text'].map((method) => (
+                        <label key={method} className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="contactMethod"
+                            value={method}
+                            checked={formData.contactMethod === method}
+                            onChange={(e) => setFormData({...formData, contactMethod: e.target.value})}
+                            className="text-blue-600"
+                          />
+                          <span className="text-sm">{method}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button 
+                    onClick={() => setStep(1)}
+                    className="flex-1 bg-gray-200 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  >
+                    Back
+                  </button>
+                  <button 
+                    onClick={() => setStep(3)}
+                    className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Review & Submit</h3>
+                <p className="text-gray-600 mb-6">Confirm your information before sending</p>
+
+                {/* Privacy & No Spam */}
+                <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-blue-800">
+                      <p className="font-medium mb-1">🔒 Your info goes directly to this school only</p>
+                      <p>No spam • No sharing • You control who contacts you</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Summary */}
+                <div className="space-y-3 mb-6">
+                  <div className="flex justify-between py-2 border-b border-gray-100">
+                    <span className="text-gray-600">School:</span>
+                    <span className="font-medium">Minneapolis Community College</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b border-gray-100">
+                    <span className="text-gray-600">Program:</span>
+                    <span className="font-medium">Medical Assistant Certificate</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b border-gray-100">
+                    <span className="text-gray-600">Preferred Start:</span>
+                    <span className="font-medium">{formData.startTime}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b border-gray-100">
+                    <span className="text-gray-600">Contact via:</span>
+                    <span className="font-medium">{formData.contactMethod}</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => setStep(2)}
+                    className="flex-1 bg-gray-200 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  >
+                    Back
+                  </button>
+                  <button 
+                    onClick={() => {
+                      alert('Your information has been sent to Minneapolis Community College! They will contact you within 1 business day.');
+                      setCurrentView('search');
+                    }}
+                    className="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                  >
+                    Send My Info
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Profile View
+  const ProfileView = () => (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm border-b p-4">
+        <div className="max-w-4xl mx-auto flex justify-between items-center">
+          <button 
+            onClick={() => setCurrentView('search')}
+            className="text-blue-600 hover:text-blue-800"
+          >
+            ← Back
+          </button>
+          <h1 className="text-lg font-semibold">My Profile</h1>
+          <div></div>
+        </div>
+      </header>
+
+      <div className="max-w-2xl mx-auto p-4">
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-xl font-bold mb-6">Personal Information</h2>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input 
+                type="text" 
+                value={userProfile.name}
+                onChange={(e) => setUserProfile({...userProfile, name: e.target.value})}
+                className="w-full p-3 border border-gray-300 rounded-lg"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+              <input 
+                type="text" 
+                value={userProfile.location}
+                onChange={(e) => setUserProfile({...userProfile, location: e.target.value})}
+                className="w-full p-3 border border-gray-300 rounded-lg"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Interested Programs</label>
+              <div className="flex flex-wrap gap-2">
+                {specialties.map((specialty) => (
+                  <button
+                    key={specialty}
+                    onClick={() => {
+                      if (userProfile.interestedPrograms.includes(specialty)) {
+                        setUserProfile({
+                          ...userProfile,
+                          interestedPrograms: userProfile.interestedPrograms.filter(p => p !== specialty)
+                        });
+                      } else {
+                        setUserProfile({
+                          ...userProfile,
+                          interestedPrograms: [...userProfile.interestedPrograms, specialty]
+                        });
+                      }
+                    }}
+                    className={`px-3 py-2 rounded-lg text-sm border ${
+                      userProfile.interestedPrograms.includes(specialty)
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300'
+                    }`}
+                  >
+                    {specialty}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Budget Range</label>
+              <select 
+                value={userProfile.budget}
+                onChange={(e) => setUserProfile({...userProfile, budget: e.target.value})}
+                className="w-full p-3 border border-gray-300 rounded-lg"
+              >
+                <option value="0-5000">$0 - $5,000</option>
+                <option value="5000-15000">$5,000 - $15,000</option>
+                <option value="15000-25000">$15,000 - $25,000</option>
+                <option value="25000+">$25,000+</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Schedule Preference</label>
+              <div className="grid grid-cols-3 gap-2">
+                {['Evening', 'Day', 'Weekend', 'Online'].map((schedule) => (
+                  <button
+                    key={schedule}
+                    onClick={() => setUserProfile({...userProfile, schedule})}
+                    className={`p-2 rounded-lg border text-sm ${
+                      userProfile.schedule === schedule
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300'
+                    }`}
+                  >
+                    {schedule}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={userProfile.financialAid}
+                  onChange={(e) => setUserProfile({...userProfile, financialAid: e.target.checked})}
+                  className="text-blue-600"
+                />
+                <span className="text-sm">Eligible for financial aid</span>
+              </label>
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={userProfile.employerBenefits}
+                  onChange={(e) => setUserProfile({...userProfile, employerBenefits: e.target.checked})}
+                  className="text-blue-600"
+                />
+                <span className="text-sm">Have employer tuition benefits</span>
+              </label>
+            </div>
+          </div>
+
+          <button className="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors font-medium mt-6">
+            Save Preferences
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // School Dashboard View
+  const SchoolDashboardView = () => {
+    const [activeTab, setActiveTab] = useState('overview');
+    
+    const mockLeads = [
+      { id: 1, name: 'Sarah Johnson', program: 'Medical Assistant', status: 'new', time: '2 hours ago', qualified: true },
+      { id: 2, name: 'Mike Torres', program: 'Phlebotomy', status: 'follow-up', time: '4 hours ago', qualified: true },
+      { id: 3, name: 'Anna Rodriguez', program: 'Radiology Tech', status: 'engaged', time: '1 day ago', qualified: false }
+    ];
+
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-blue-600 text-white p-4">
+          <div className="max-w-6xl mx-auto flex justify-between items-center">
+            <div>
+              <h1 className="text-xl font-bold">Minneapolis Community College</h1>
+              <p className="text-blue-200 text-sm">Partner Dashboard</p>
+            </div>
+            <button 
+              onClick={() => setCurrentView('home')}
+              className="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-lg"
+            >
+              Lisa M. ▼
+            </button>
+          </div>
+        </header>
+
+        {/* Navigation */}
+        <div className="bg-white border-b">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="flex space-x-6">
+              {[
+                { id: 'overview', label: 'Overview' },
+                { id: 'programs', label: 'Programs' },
+                { id: 'leads', label: 'Leads' },
+                { id: 'analytics', label: 'Analytics' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`py-4 px-2 border-b-2 font-medium text-sm ${
+                    activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto p-4">
+          {activeTab === 'overview' && (
+            <div>
+              {/* Key Metrics */}
+              <div className="grid md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-white p-4 rounded-lg shadow-sm border">
+                  <div className="text-2xl font-bold text-blue-600">247</div>
+                  <div className="text-sm text-gray-600">New Inquiries</div>
+                  <div className="text-xs text-green-600">↑ 23% this month</div>
+                </div>
+                <div className="bg-white p-4 rounded-lg shadow-sm border">
+                  <div className="text-2xl font-bold text-green-600">89</div>
+                  <div className="text-sm text-gray-600">Enrollments</div>
+                  <div className="text-xs text-green-600">↑ 15% this month</div>
+                </div>
+                <div className="bg-white p-4 rounded-lg shadow-sm border">
+                  <div className="text-2xl font-bold text-yellow-600">36%</div>
+                  <div className="text-sm text-gray-600">Conversion Rate</div>
+                  <div className="text-xs text-red-600">↓ 3% this month</div>
+                </div>
+                <div className="bg-white p-4 rounded-lg shadow-sm border">
+                  <div className="text-2xl font-bold text-purple-600">$3,420</div>
+                  <div className="text-sm text-gray-600">Revenue/Student</div>
+                  <div className="text-xs text-green-600">↑ 8% this month</div>
+                </div>
+              </div>
+
+              {/* Recent Activity */}
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className="flex-1">
+                      <p className="text-sm">Sarah Johnson enrolled in Medical Assistant program</p>
+                    </div>
+                    <span className="text-xs text-gray-500">2 hours ago</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <div className="flex-1">
+                      <p className="text-sm">New inquiry: Mike Torres - Phlebotomy program</p>
+                    </div>
+                    <span className="text-xs text-gray-500">4 hours ago</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'leads' && (
+            <div>
+              <div className="bg-white rounded-lg shadow-sm border">
+                <div className="p-6 border-b">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Recent Inquiries</h3>
+                    <div className="flex gap-2">
+                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
+                        New ({mockLeads.filter(l => l.status === 'new').length})
+                      </span>
+                      <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
+                        Follow-up ({mockLeads.filter(l => l.status === 'follow-up').length})
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="divide-y">
+                  {mockLeads.map((lead) => (
+                    <div key={lead.id} className="p-6 hover:bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-semibold">
+                            {lead.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold">{lead.name}</h4>
+                            <p className="text-sm text-gray-600">{lead.program} • Evening classes preferred</p>
+                            {lead.qualified && (
+                              <p className="text-sm text-green-600">✓ Pre-qualified • Eligible for financial aid</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 text-xs rounded-full ${
+                            lead.status === 'new' ? 'bg-green-100 text-green-800' :
+                            lead.status === 'follow-up' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-blue-100 text-blue-800'
+                          }`}>
+                            {lead.status.toUpperCase()}
+                          </span>
+                          <span className="text-xs text-gray-500">{lead.time}</span>
+                          <button className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                            Contact
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // Employer Dashboard View
+  const EmployerDashboardView = () => {
+    const [activeTab, setActiveTab] = useState('pipeline');
+
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-green-600 text-white p-4">
+          <div className="max-w-6xl mx-auto flex justify-between items-center">
+            <div>
+              <h1 className="text-xl font-bold">Mayo Clinic Health System</h1>
+              <p className="text-green-200 text-sm">Workforce Edge Partner</p>
+            </div>
+            <button 
+              onClick={() => setCurrentView('home')}
+              className="bg-green-700 hover:bg-green-800 px-4 py-2 rounded-lg"
+            >
+              Jennifer H. ▼
+            </button>
+          </div>
+        </header>
+
+        {/* Navigation */}
+        <div className="bg-white border-b">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="flex space-x-6">
+              {[
+                { id: 'pipeline', label: 'Pipeline' },
+                { id: 'employees', label: 'Employees' },
+                { id: 'candidates', label: 'Candidates' },
+                { id: 'analytics', label: 'Analytics' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`py-4 px-2 border-b-2 font-medium text-sm ${
+                    activeTab === tab.id
+                      ? 'border-green-500 text-green-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto p-4">
+          {activeTab === 'pipeline' && (
+            <div>
+              {/* Current Hiring Needs */}
+              <h3 className="text-xl font-bold mb-4">Current Hiring Needs</h3>
+              <div className="grid md:grid-cols-3 gap-4 mb-8">
+                <div className="bg-white border-l-4 border-red-500 p-6 rounded-lg shadow-sm">
+                  <h4 className="font-semibold text-lg">Medical Assistants</h4>
+                  <div className="text-2xl font-bold text-red-500 my-2">12 open positions</div>
+                  <p className="text-sm text-gray-600 mb-1">Target: Fill by March 2025</p>
+                  <p className="text-sm text-green-600">47 candidates in pipeline</p>
+                </div>
+                <div className="bg-white border-l-4 border-yellow-500 p-6 rounded-lg shadow-sm">
+                  <h4 className="font-semibold text-lg">Radiology Techs</h4>
+                  <div className="text-2xl font-bold text-yellow-500 my-2">6 open positions</div>
+                  <p className="text-sm text-gray-600 mb-1">Target: Fill by June 2025</p>
+                  <p className="text-sm text-green-600">23 candidates in pipeline</p>
+                </div>
+                <div className="bg-white border-l-4 border-green-500 p-6 rounded-lg shadow-sm">
+                  <h4 className="font-semibold text-lg">Phlebotomists</h4>
+                  <div className="text-2xl font-bold text-green-500 my-2">3 open positions</div>
+                  <p className="text-sm text-gray-600 mb-1">Target: Fill by April 2025</p>
+                  <p className="text-sm text-green-600">18 candidates in pipeline</p>
+                </div>
+              </div>
+
+              {/* Employee Education Benefits */}
+              <div className="bg-green-50 border border-green-200 p-6 rounded-lg">
+                <h4 className="font-semibold text-lg text-green-800 mb-3">Employee Education Benefits</h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="font-medium mb-2">Current Enrollments: 34 employees</p>
+                    <ul className="text-sm text-green-700 space-y-1">
+                      <li>• 18 employees in Medical Assistant programs</li>
+                      <li>• 12 employees in Nursing bridge programs</li>
+                      <li>• 4 employees in Radiology Tech programs</li>
+                    </ul>
+                  </div>
+                  <div className="text-right">
+                    <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                      Promote Benefits
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'candidates' && (
+            <div>
+              <div className="bg-white rounded-lg shadow-sm border">
+                <div className="p-6 border-b">
+                  <h3 className="text-lg font-semibold mb-4">Available Candidates</h3>
+                  <div className="flex gap-2 mb-4">
+                    <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">Medical Assistant</span>
+                    <span className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">Graduating Soon</span>
+                    <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full">Local</span>
+                  </div>
+                </div>
+
+                <div className="divide-y">
+                  {[
+                    { name: 'Sarah Johnson', program: 'Medical Assistant', school: 'Minneapolis Community College', graduation: 'March 2025', gpa: '4.2', status: 'new', distance: '5 miles' },
+                    { name: 'Mike Torres', program: 'Medical Assistant', school: 'Hennepin Technical College', graduation: 'June 2025', gpa: '3.8', status: 'interested', distance: '12 miles' },
+                    { name: 'Anna Rodriguez', program: 'Medical Assistant', school: 'Rasmussen University', graduation: 'September 2025', gpa: '3.9', status: 'watch', distance: '45 miles' }
+                  ].map((candidate, index) => (
+                    <div key={index} className="p-6 hover:bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center font-semibold">
+                            {candidate.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold">{candidate.name}</h4>
+                            <p className="text-sm text-gray-600">{candidate.program} • {candidate.school}</p>
+                            <p className="text-sm text-green-600">✓ Graduating {candidate.graduation} • {candidate.gpa} GPA • Full-time seeking</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 text-xs rounded-full ${
+                            candidate.status === 'new' ? 'bg-green-100 text-green-800' :
+                            candidate.status === 'interested' ? 'bg-blue-100 text-blue-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {candidate.status.toUpperCase()}
+                          </span>
+                          <span className="text-xs text-gray-500">{candidate.distance}</span>
+                          <button className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+                            {candidate.status === 'interested' ? 'Interview' : 'Contact'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-4 bg-green-50 border-t">
+                  <p className="text-sm text-green-800 font-medium">
+                    Pipeline Health: 47 candidates for 12 positions (3.9:1 ratio) • Average time-to-hire: 28 days
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // Compare View
+  const CompareView = () => {
+    const selectedProgramsData = mockPrograms.filter(p => selectedPrograms.includes(p.id));
+    
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-white shadow-sm border-b p-4">
+          <div className="max-w-6xl mx-auto flex justify-between items-center">
+            <button 
+              onClick={() => setCurrentView('search')}
+              className="text-blue-600 hover:text-blue-800"
+            >
+              ← Back to Search
+            </button>
+            <h1 className="text-lg font-semibold">Compare Programs</h1>
+            <div></div>
+          </div>
+        </header>
+
+        <div className="max-w-6xl mx-auto p-4">
+          <h2 className="text-xl font-bold mb-6">Medical Assistant Programs Comparison</h2>
+          
+          <div className="bg-white rounded-lg shadow-sm border overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="text-left p-4 font-medium text-gray-600">Program</th>
+                  {selectedProgramsData.map((program) => (
+                    <th key={program.id} className="text-center p-4 font-medium text-gray-900 min-w-48">
+                      {program.school}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                <tr>
+                  <td className="p-4 font-medium text-gray-600">Duration</td>
+                  {selectedProgramsData.map((program) => (
+                    <td key={program.id} className="p-4 text-center">{program.duration}</td>
+                  ))}
+                </tr>
+                <tr className="bg-gray-50">
+                  <td className="p-4 font-medium text-gray-600">Cost (after aid)</td>
+                  {selectedProgramsData.map((program) => (
+                    <td key={program.id} className="p-4 text-center">
+                      <span className="text-green-600 font-semibold">
+                        ${program.cost.toLocaleString()}
+                      </span>
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className="p-4 font-medium text-gray-600">Distance</td>
+                  {selectedProgramsData.map((program) => (
+                    <td key={program.id} className="p-4 text-center">{program.location}</td>
+                  ))}
+                </tr>
+                <tr className="bg-gray-50">
+                  <td className="p-4 font-medium text-gray-600">Schedule</td>
+                  {selectedProgramsData.map((program) => (
+                    <td key={program.id} className="p-4 text-center">
+                      {program.schedule.join(', ')}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className="p-4 font-medium text-gray-600">Job Placement</td>
+                  {selectedProgramsData.map((program) => (
+                    <td key={program.id} className="p-4 text-center text-green-600 font-medium">
+                      {program.jobPlacement}%
+                    </td>
+                  ))}
+                </tr>
+                <tr className="bg-gray-50">
+                  <td className="p-4 font-medium text-gray-600">Rating</td>
+                  {selectedProgramsData.map((program) => (
+                    <td key={program.id} className="p-4 text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                        {program.rating}/5
+                      </div>
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Winner Indicator */}
+          {selectedProgramsData.length > 0 && (
+            <div className="mt-6 text-center">
+              <div className="inline-block bg-green-100 border border-green-300 px-4 py-2 rounded-lg">
+                <span className="text-green-800 font-medium">
+                  Best Match: {selectedProgramsData[0].school}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Detailed Pros/Cons */}
+          {selectedProgramsData.length > 0 && (
+            <div className="mt-8 bg-white rounded-lg shadow-sm border p-6">
+              <h3 className="text-lg font-semibold mb-4">{selectedProgramsData[0].school}</h3>
+              
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-medium text-green-600 mb-2">Pros:</h4>
+                  <ul className="text-sm text-gray-600 space-y-1">
+                    <li>• Lowest cost after financial aid</li>
+                    <li>• Closest to your location</li>
+                    <li>• Evening schedule matches preference</li>
+                    <li>• Highest job placement rate</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-medium text-red-600 mb-2">Considerations:</h4>
+                  <ul className="text-sm text-gray-600 space-y-1">
+                    <li>• Slightly longer program duration</li>
+                    <li>• Limited weekend options</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button 
+                  onClick={() => setCurrentView('contact-school')}
+                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  Apply
+                </button>
+                <button 
+                  onClick={() => setCurrentView('career-path')}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  View Career Path
+                </button>
+                <button className="bg-white border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                  Save Comparison
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // Render current view
+  const renderView = () => {
+    switch (currentView) {
+      case 'home': return <HomeView />;
+      case 'search': return <SearchView />;
+      case 'profile': return <ProfileView />;
+      case 'career-path': return <CareerPathView />;
+      case 'contact-school': return <ContactSchoolView />;
+      case 'compare': return <CompareView />;
+      case 'school-dashboard': return <SchoolDashboardView />;
+      case 'employer-dashboard': return <EmployerDashboardView />;
+      default: return <HomeView />;
+    }
+  };
+
+  return (
+    <div className="font-sans">
+      {renderView()}
+      
+      {/* Navigation hint */}
+      <div className="fixed top-4 right-4 bg-white border border-gray-200 rounded-lg p-3 shadow-lg text-xs text-gray-600 max-w-xs">
+        <p className="font-medium mb-1">🔍 Interactive Prototype</p>
+        <p>Click buttons to navigate between views. Try the multi-user dashboards!</p>
+      </div>
+    </div>
+  );
+};
+
+export default Allied_Health_Platform;
